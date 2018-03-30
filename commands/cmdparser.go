@@ -20,6 +20,9 @@ func ExecCommand(command string, args []string) {
 	// 获取密码
 	case "GET":
 		getPassword(args)
+	// 设置密码
+	case "SET":
+		setPassword(args)
 	// 测试项目
 	case "TEST":
 		execTest()

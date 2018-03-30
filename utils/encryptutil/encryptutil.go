@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/pem"
 	"os"
+	"encoding/base64"
 	"../fileutil"
 	"../../config"
 )
@@ -52,4 +53,26 @@ func GenRsaKey(bits int, storePath string) (*config.CertConfig, error) {
 		return nil,err
 	}
 	return cfg,nil
+}
+
+// 加密数据
+func EncryptData(data string) (string, error) {
+	encBytes, err := rsaEncrypt([]byte(data))
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(encBytes), nil
+}
+
+// 解密密数据
+func DecryptData(data string) (string, error) {
+	byteData, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return "", err
+	}
+	decBytes, err := rsaDecrypt(byteData)
+	if err != nil {
+		return "", err
+	}
+	return string(decBytes), nil
 }

@@ -67,10 +67,18 @@ func IsTableExists(conn *sql.DB, tableName string) (bool, error) {
 
 // 初始化表结构
 func initTables(conn *sql.DB) {
+    // 创建数据表
     for table, sql := range config.DbInitSqls {
         _,err := conn.Exec(sql)
         if err != nil {
             log.Fatalf("initialize table %s failed : %s \n", table, err)
+        }
+    }
+    // 创建索引
+    for _, sql := range config.DbIndexSqls {
+        _,err := conn.Exec(sql)
+        if err != nil {
+            log.Fatalf("execute %s failed : %s \n", sql, err)
         }
     }
 }

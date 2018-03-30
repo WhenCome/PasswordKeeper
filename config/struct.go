@@ -23,7 +23,8 @@ type CertConfig struct{
 type UserConfig struct {
 	AppDataDir		string      // 数据存储目录
 	BackupDir		string		// 备份目录
-
+	SecurityCode	string		// app security password
+	Salt			string      // rand string
 }
 
 

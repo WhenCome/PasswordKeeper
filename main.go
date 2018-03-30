@@ -15,7 +15,7 @@ func main()  {
 	command := os.Args[1]
 	args := []string{}
 	if len(os.Args) > 2 {
-		copy(args, os.Args[2:])
+		args = os.Args[2:]
 	}
 	commands.ExecCommand(command, args)
 }

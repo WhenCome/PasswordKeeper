@@ -16,6 +16,9 @@ var AppConfigFile string 		// app配置文件
 
 var SessionTokenFile string		// 会话令牌文件
 
+// 配置信息
+var AppConfig *PwdKeeperConfig = nil
+
 // 错误信息
 var ErrConfigNotExists error = errors.New("Config File Not Exists")
 

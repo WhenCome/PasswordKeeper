@@ -13,12 +13,13 @@ var DbInitSqls map[string]string = map[string]string{
 	"pwd_items" : `create table if not exists pwd_items (
         _id integer primary key autoincrement,
         item varchar(255),
-        pwd_encrypt varchar(3000),
-        salt varchar(64),
-        enabled varchar(10),
+        password varchar(3000),
 		description varchar(3000),
 		create_time varchar(32),
-		disable_time varchar(32),
 		update_time varchar(32)
     )`,
+}
+// 创建索引的sql
+var DbIndexSqls []string = []string{
+	"CREATE UNIQUE INDEX idx_item on pwd_items(item)",
 }
