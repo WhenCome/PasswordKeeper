@@ -2,32 +2,59 @@ package backuputil
 
 import (
 	"../../config"
+	"../../utils/fileutil"
 	"path/filepath"
 	"os"
 	"fmt"
 )
 
 // 同步备份配置
-func Sync() {
-	filepath.Walk(config.AppDataDir, func(path string, info os.FileInfo, err error) error {
-
-		return nil
-	})
+func Sync() error {
+	// 读取配置
+	pwdCfg, err := config.LoadConfig()
+	if err != nil {
+		return err
+	}
+	backupDir := pwdCfg.UserCfg.BackupDir
+	exists, err := fileutil.IsPathExists(backupDir)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		err = os.MkdirAll(backupDir, 0777)
+		if err != nil {
+			return err
+		}
+	}
+	syncDir(config.AppDataDir, backupDir)
+	return nil
 }
 
-func syncFile(srcFile, fileName string){
-
+// 同步文件
+func syncFile(srcFile, targetFile string){
+	fileutil.CopyFile(targetFile, srcFile)
 }
 
-func syncDir(dir string) {
+// 同步目录
+func syncDir(dir string, targetDir string) {
+	exists, err := fileutil.IsPathExists(targetDir)
+	if err != nil {
+		return
+	}
+	if !exists {
+		err = os.MkdirAll(targetDir, 0777)
+		if err != nil {
+			return
+		}
+	}
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if info.IsDir() {
-			syncDir(fmt.Sprintf("%s/%s", dir, info.Name()))
+			syncDir(fmt.Sprintf("%s/%s", dir, info.Name()), fmt.Sprintf("%s/%s", targetDir, info.Name()))
 		} else {
-			syncFile(fmt.Sprintf("%s/%s", dir, info.Name()), info.Name())
+			syncFile(fmt.Sprintf("%s/%s", dir, info.Name()), fmt.Sprintf("%s/%s", targetDir, info.Name()))
 		}
 		return nil
 	})

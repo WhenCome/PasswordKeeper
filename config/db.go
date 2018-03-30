@@ -4,8 +4,10 @@ package config
 // 数据库基本信息
 var DbDriver string = "sqlite3"
 var DbName string = "pwdkeeper.db"
+var DbFile string = ""
 // 数据库初始信息文件(此文件存在表示数据库已经创建)
 var DbInitFlag = "db_init_flag"
+var DbInitFlagFile string = ""
 // 数据表初始化SQL
 var DbInitSqls map[string]string = map[string]string{
 	"pwd_items" : `create table if not exists pwd_items (
