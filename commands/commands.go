@@ -49,11 +49,16 @@ func initEnv() {
 	}
 	pwdCfg.CertCfg = *certCfg
 
+	// 用于读取命令行输入
+	bio := bufio.NewReader(os.Stdin)
+
 	// 设置安全密码
 	securityPwd := ""
 	for securityPwd == "" {
 		fmt.Print("Enter security code: ")
-		fmt.Scanf("%s", securityPwd)
+		line, _, _ := bio.ReadLine()
+		securityPwd = string(line)
+		// fmt.Scanf("%s", securityPwd)
 		if securityPwd == "" {
 			fmt.Println("Error: security code can not be empty, please enter again!")
 			continue
@@ -68,7 +73,9 @@ func initEnv() {
 	// 设置备份目录
 	fmt.Println("Please enter backup dir:")
 	backupDir := ""
-	fmt.Scanf("%s", &backupDir)
+	line, _, _ := bio.ReadLine()
+	backupDir = string(line)
+	// fmt.Scanf("%s", &backupDir)
 	pwdCfg.SetBackupDir(backupDir)
 
 	// 写入配置文件
@@ -96,6 +103,22 @@ func syncConfigs() {
 	backuputil.Sync()
 }
 
+// 查询密码
+func queryPassword(itemKey string) (string, error) {
+	passwdItem, err := pwditem.GetByItem(itemKey)
+	if err != nil {
+		return "", err
+	}
+	if passwdItem == nil {
+		return "",fmt.Errorf("password item [%s] not exists", itemKey)
+	}
+	decData, err := encryptutil.DecryptData(passwdItem.Password)
+	if err != nil {
+		return "", err
+	}
+	return decData, nil
+}
+
 // 获取密码
 func getPassword(args []string) {
 	if len(args) < 1 {
@@ -103,6 +126,7 @@ func getPassword(args []string) {
 		return
 	}
 	itemKey := args[0]
+	/*
 	passwdItem, err := pwditem.GetByItem(itemKey)
 	if err != nil {
 		fmt.Printf("Error while query data from db: %s \n", err)
@@ -112,17 +136,38 @@ func getPassword(args []string) {
 		fmt.Println("Password item not exists, use set to add it.")
 		return
 	}
-	fmt.Println(passwdItem.Password)
 	decData, err := encryptutil.DecryptData(passwdItem.Password)
 	if err != nil {
 		fmt.Printf("Error wile decrypt data: %s \n", err)
 		return
 	}
-	fmt.Println(decData)
+	*/
+	decData, err := queryPassword(itemKey)
+	if err != nil {
+		fmt.Printf("query password failed : %s \n", err)
+		return
+	}
 	err = clipboard.WriteAll(decData)
 	if err != nil {
 		fmt.Printf("Copy password failed : %s \n", err)
+		return
 	}
+	fmt.Println("Password already copied, you can paste it anywhere you want.")
+}
+
+// 获取密码并直接展示明文
+func getPasswordDirect(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
+		return
+	}
+	itemKey := args[0]
+	decData, err := queryPassword(itemKey)
+	if err != nil {
+		fmt.Printf("query password failed : %s \n", err)
+		return
+	}
+	fmt.Printf("Your password is : %s \n", decData)
 }
 
 // 设置密码
@@ -184,6 +229,39 @@ func setPassword(args []string) {
 		log.Fatalf("Set password for %s failed : %s \n", itemKey, err)
 	}
 	fmt.Printf("Set password for %s success.\n", itemKey)
+}
+
+// 展示所有密码项
+func showItems() {
+	items, err := pwditem.GetItems()
+	if err != nil {
+		fmt.Printf("Error while query items : %s \n", err)
+		return
+	}
+	fmt.Println("Item\t\tUpdate Time")
+	fmt.Println("-------\t\t---------")
+	for _, item := range items {
+		fmt.Printf("%s\t\t%s\n", item.Item, item.UpdateTime)
+	}
+}
+
+// 删除密码项
+func deleteItem(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
+		return
+	}
+	itemKey := args[0]
+	affectedRows, err := pwditem.DeleteByItem(itemKey)
+	if err != nil {
+		fmt.Printf("Remove password item failed : %s \n", err)
+		return
+	}
+	if affectedRows == 0 {
+		fmt.Printf("Password item not exists. \n")
+		return
+	}
+	fmt.Printf("Password item [%s] already removed. \n", itemKey)
 }
 
 // 执行测试命令

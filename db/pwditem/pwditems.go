@@ -97,3 +97,50 @@ func (pwdItem *PwdItem) UpdateToDb()  (int64, error) {
 	}
 	return affectedRows, nil
 }
+
+// 根据item key获取一条密码项
+func GetItems() ([]*PwdItem, error) {
+	querySql := "select _id,item,update_time from pwd_items"
+	stmt, err := db.Db.Connection.Prepare(querySql)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	// 开始查询
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*PwdItem, 0)
+	for rows.Next() {
+		pItem := NewPwdItem()
+		err = rows.Scan(
+			&pItem.Id,
+			&pItem.Item,
+			&pItem.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, pItem)
+	}
+	return items, nil
+}
+
+// 根据key删除对应的项
+func DeleteByItem(item string) (int64, error) {
+	sql := "delete from pwd_items where item = ?"
+	stmt, err := db.Db.Connection.Prepare(sql)
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+	result, err := stmt.Exec(item)
+	if err != nil {
+		return 0, err
+	}
+	affectedRows, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return affectedRows, nil
+}
