@@ -68,11 +68,20 @@ func showHelp() {
 		"NOTE: before you use password keeper, run init first to make a setup.",
 		"Password Keeper command list:",
 		"\thelp\n\t\tshow commands help",
+		"\tinit\n\t\tinitialize app environment and config, including set security code, security code is required in all of the app time",
+		"\tsync\n\t\tsync all app file(data and config) to backup directory, this is a good way to make sure that you can recovery your key data in case the app data was lost, but first, you should set your backup directory when initialize the app run time",
 		"\tget [item_key]\n\t\tcopy [item_key]'s password to clipboard, this command won't show plain password directly",
-		"\tset [item_key]\n\tset [item_key]'s password",
+		"\tgetd [item_key]\n\t\tget [item_key]'s password and display it directly",
+		"\tset [item_key]\n\t\tset [item_key]'s password",
+		"\titems\n\t\tshow all password items, it will just show password item and last update time",
+		"\tdesc [item_key]\n\t\tshow description of password item",
+		"\tchpwd [item_key]\n\t\tchange password of given password item",
+		"\tchdesc [item_key]\n\t\tchange description of giver password item",
+		"\tdel [item_key]\n\t\tdelete given password item from database, if you synchronized all the app data, then the delete operation can not be recoveried",
+		"\tlock\n\t\tlock the current session(current session will be destroyed), this will make you enter your security code, this will be useful when other people can access your computer",
 	}
 	for _,output := range outputs {
-		fmt.Println(output)
+		fmt.Println(output+"\n")
 	}
 }
 
