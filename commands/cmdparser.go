@@ -29,6 +29,15 @@ func ExecCommand(command string, args []string) {
 	// 展示所有项
 	case "ITEMS":
 		showItems()
+	// 显示项目的描述信息
+	case "DESC":
+		descripeItem(args)
+	// 修改密码
+	case "CHPWD":
+		changePassword(args)
+	// 修改描述
+	case "CHDESC":
+		changeDescription(args)
 	// 删除某个密码项
 	case "DEL":
 		deleteItem(args)

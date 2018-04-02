@@ -29,9 +29,6 @@ func mustCheckSession() {
 		return
 	}
 	fmt.Print("Please enter security code : ")
-	// bio := bufio.NewReader(os.Stdin)
-	// line,_,_ := bio.ReadLine()
-	// securityCode := string(line)
 	securityCode := envutil.ReadLine()
 	if !verifySecurityCode(pwdCfg, securityCode) {
 		fmt.Println("Security verify failed!")
@@ -48,6 +45,21 @@ func verifySecurityCode(cfg *config.PwdKeeperConfig, code string) bool {
 		return true
 	}
 	return false
+}
+
+// 强制进行安全验证
+func mustVerifySecurity() {
+	pwdCfg, err := config.LoadConfig()
+	if err != nil {
+		fmt.Printf("Load config failed: %s \n. Please try again later.", err)
+		os.Exit(-1)
+	}
+	fmt.Print("Please enter security code : ")
+	securityCode := envutil.ReadLine()
+	if !verifySecurityCode(pwdCfg, securityCode) {
+		fmt.Println("Security verify failed!")
+		os.Exit(-1)
+	}
 }
 
 // 显示帮助信息
@@ -95,17 +107,11 @@ func initEnv() {
 	}
 	pwdCfg.CertCfg = *certCfg
 
-	// 用于读取命令行输入
-	// bio := bufio.NewReader(os.Stdin)
-
 	// 设置安全密码
 	securityPwd := ""
 	for securityPwd == "" {
 		fmt.Print("Enter security code: ")
-		// line, _, _ := bio.ReadLine()
-		// securityPwd = string(line)
 		securityPwd := envutil.ReadLine()
-		// fmt.Scanf("%s", securityPwd)
 		if securityPwd == "" {
 			fmt.Println("Error: security code can not be empty, please enter again!")
 			continue
@@ -119,11 +125,7 @@ func initEnv() {
 	pwdCfg.UserCfg.AppDataDir = config.AppDataDir
 	// 设置备份目录
 	fmt.Println("Please enter backup dir:")
-	// backupDir := ""
-	// line, _, _ := bio.ReadLine()
-	// backupDir = string(line)
 	backupDir := envutil.ReadLine()
-	// fmt.Scanf("%s", &backupDir)
 	pwdCfg.SetBackupDir(backupDir)
 
 	// 写入配置文件
@@ -150,6 +152,7 @@ func syncConfigs() {
 		return
 	}
 	backuputil.Sync()
+	fmt.Println("Sync success.")
 }
 
 // 查询密码
@@ -168,6 +171,18 @@ func queryPassword(itemKey string) (string, error) {
 	return decData, nil
 }
 
+// 获取密码项
+func mustQueryPasswordItem(itemKey string) *pwditem.PwdItem {
+	passwdItem, err := pwditem.GetByItem(itemKey)
+	if err != nil {
+		log.Fatalf("query item failed : %s \n", err)
+	}
+	if passwdItem == nil {
+		log.Fatalf("password item not exists")
+	}
+	return passwdItem
+}
+
 // 获取密码
 func getPassword(args []string) {
 	mustCheckSession()
@@ -176,22 +191,6 @@ func getPassword(args []string) {
 		return
 	}
 	itemKey := args[0]
-	/*
-	passwdItem, err := pwditem.GetByItem(itemKey)
-	if err != nil {
-		fmt.Printf("Error while query data from db: %s \n", err)
-		return
-	}
-	if passwdItem == nil {
-		fmt.Println("Password item not exists, use set to add it.")
-		return
-	}
-	decData, err := encryptutil.DecryptData(passwdItem.Password)
-	if err != nil {
-		fmt.Printf("Error wile decrypt data: %s \n", err)
-		return
-	}
-	*/
 	decData, err := queryPassword(itemKey)
 	if err != nil {
 		fmt.Printf("query password failed : %s \n", err)
@@ -232,14 +231,9 @@ func setPassword(args []string) {
 	// 1. 输入密码（required）
 	var password string
 	var description string
-	// bio := bufio.NewReader(os.Stdin)
-	// use a loop to get a non-empty password
 	for password == "" {
 		fmt.Print("Enter password: ")
-		// line, _, _ := bio.ReadLine()
-		// password = strings.Trim(string(line),"\r\n ")
 		password = envutil.ReadLine()
-		// fmt.Scanf("%s", &password)
 		if password == "" {
 			fmt.Println("Error: password can not be empty, please enter again!")
 			continue
@@ -248,9 +242,6 @@ func setPassword(args []string) {
 	}
 	// 2. got item description
 	fmt.Print("Enter item description: ")
-	// fmt.Scanln(&description)
-	// line, _, _ := bio.ReadLine()
-	// description = string(line)
 	description = envutil.ReadLine()
 	// 3. save password
 	passwdItem, err := pwditem.GetByItem(itemKey)
@@ -293,10 +284,10 @@ func showItems() {
 		fmt.Printf("Error while query items : %s \n", err)
 		return
 	}
-	fmt.Println("Item\t\tUpdate Time")
-	fmt.Println("-------\t\t---------")
+	fmt.Println(wrapString("Item", 24),"\t",wrapString("Update Time", 24))
+	fmt.Println(wrapString("-------------", 24),"\t",wrapString("----------------", 24))
 	for _, item := range items {
-		fmt.Printf("%s\t\t%s\n", item.Item, item.UpdateTime)
+		fmt.Println(wrapString(item.Item, 24),"\t",wrapString(item.UpdateTime, 24))
 	}
 }
 
@@ -337,6 +328,78 @@ func lock() {
 		}
 	}
 	fmt.Println("Session destroyed!")
+}
+
+// 描述项目
+func descripeItem(args []string) {
+	mustCheckSession()
+	if len(args) < 1 {
+		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
+		return
+	}
+	itemKey := args[0]
+	passwdItem, err := pwditem.GetByItem(itemKey)
+	if err != nil {
+		fmt.Printf("query item failed : %s \n", err)
+		return
+	}
+	fmt.Println(passwdItem.Description)
+}
+
+// 修改密码
+func changePassword(args []string) {
+	mustVerifySecurity()
+	if len(args) < 1 {
+		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
+		return
+	}
+	itemKey := args[0]
+	passwdItem := mustQueryPasswordItem(itemKey)
+	fmt.Printf("Do you confirm to change password for %s? (y/n) : ", itemKey)
+	input := envutil.ReadChar()
+	if strings.ToLower(input) != "y" {
+		fmt.Println("Operation terminated!")
+		return
+	}
+	fmt.Print("Enter your new password : ")
+	pwd1 := envutil.ReadLine()
+	fmt.Print("Confirm your new password : ")
+	pwd2 := envutil.ReadLine()
+	if pwd1 != pwd2 {
+		fmt.Println("ERROR : password not match!")
+		return
+	}
+	encPwd, err := encryptutil.EncryptData(pwd1)
+	if err != nil {
+		log.Fatalf("encrypt data failed : %s \n", err)
+	}
+	passwdItem.Password = encPwd
+	passwdItem.UpdateTime = timeutil.GetCurrentFmtTime()
+	_, err = passwdItem.UpdateToDb()
+	if err != nil {
+		log.Fatalf("update data failed : %s \n", err)
+	}
+	fmt.Println("Password changed.")
+}
+
+// 修改描述信息
+func changeDescription(args []string) {
+	mustCheckSession()
+	if len(args) < 1 {
+		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
+		return
+	}
+	itemKey := args[0]
+	passwdItem := mustQueryPasswordItem(itemKey)
+	fmt.Print("Enter new description : ")
+	description := envutil.ReadLine()
+	passwdItem.Description = description
+	passwdItem.UpdateTime = timeutil.GetCurrentFmtTime()
+	_, err := passwdItem.UpdateToDb()
+	if err != nil {
+		log.Fatalf("update data failed : %s \n", err)
+	}
+	fmt.Println("Description changed.")
 }
 
 // 执行测试命令
