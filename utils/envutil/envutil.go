@@ -8,6 +8,7 @@ import (
 	"strings"
 	"errors"
 	"runtime"
+	"bufio"
 )
 
 // 获取home目录路径，需要区分windows以及linux
@@ -62,4 +63,18 @@ func homeWindows() (string, error) {
 	}
 
 	return home, nil
+}
+
+// 读取一行
+func ReadLine() string {
+	bio := bufio.NewReader(os.Stdin)
+	line, _, _ := bio.ReadLine()
+	return strings.Trim(string(line),"\r\n ")
+}
+
+// 读取一个字符
+func ReadChar() string {
+	bio := bufio.NewReader(os.Stdin)
+	b,_ := bio.ReadByte()
+	return string(b)
 }

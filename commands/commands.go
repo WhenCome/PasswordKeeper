@@ -6,13 +6,48 @@ import (
 	"../utils/backuputil"
 	"../utils/randutil"
 	"../utils/timeutil"
+	"../utils/envutil"
 	"../config"
 	"../db/pwditem"
 	"log"
-	"bufio"
 	"os"
 	"github.com/atotto/clipboard"
+	"strings"
 )
+
+// 检查会话，用于确保安全操作
+func mustCheckSession() {
+	if config.Sess.IsValid() {
+		return
+	}
+	fmt.Println("Session invalid! We need confirm your auth again.")
+	// 加载配置
+	pwdCfg, err := config.LoadConfig()
+	if err != nil {
+		fmt.Printf("Load config failed: %s . Have you initialized it before?\n", err)
+		return
+	}
+	fmt.Print("Please enter security code : ")
+	// bio := bufio.NewReader(os.Stdin)
+	// line,_,_ := bio.ReadLine()
+	// securityCode := string(line)
+	securityCode := envutil.ReadLine()
+	if !verifySecurityCode(pwdCfg, securityCode) {
+		fmt.Println("Security verify failed!")
+		os.Exit(-1)
+	}
+	// 更新session信息
+	config.Sess.Revalid()
+}
+
+// 验证安全码
+func verifySecurityCode(cfg *config.PwdKeeperConfig, code string) bool {
+	signRs := encryptutil.Md5(code, cfg.UserCfg.Salt)
+	if signRs == cfg.UserCfg.SecurityCode {
+		return true
+	}
+	return false
+}
 
 // 显示帮助信息
 func showHelp() {
@@ -50,14 +85,15 @@ func initEnv() {
 	pwdCfg.CertCfg = *certCfg
 
 	// 用于读取命令行输入
-	bio := bufio.NewReader(os.Stdin)
+	// bio := bufio.NewReader(os.Stdin)
 
 	// 设置安全密码
 	securityPwd := ""
 	for securityPwd == "" {
 		fmt.Print("Enter security code: ")
-		line, _, _ := bio.ReadLine()
-		securityPwd = string(line)
+		// line, _, _ := bio.ReadLine()
+		// securityPwd = string(line)
+		securityPwd := envutil.ReadLine()
 		// fmt.Scanf("%s", securityPwd)
 		if securityPwd == "" {
 			fmt.Println("Error: security code can not be empty, please enter again!")
@@ -72,9 +108,10 @@ func initEnv() {
 	pwdCfg.UserCfg.AppDataDir = config.AppDataDir
 	// 设置备份目录
 	fmt.Println("Please enter backup dir:")
-	backupDir := ""
-	line, _, _ := bio.ReadLine()
-	backupDir = string(line)
+	// backupDir := ""
+	// line, _, _ := bio.ReadLine()
+	// backupDir = string(line)
+	backupDir := envutil.ReadLine()
 	// fmt.Scanf("%s", &backupDir)
 	pwdCfg.SetBackupDir(backupDir)
 
@@ -90,6 +127,7 @@ func initEnv() {
 
 // 同步配置
 func syncConfigs() {
+	mustCheckSession()
 	// 加载配置
 	pwdCfg, err := config.LoadConfig()
 	if err != nil {
@@ -121,6 +159,7 @@ func queryPassword(itemKey string) (string, error) {
 
 // 获取密码
 func getPassword(args []string) {
+	mustCheckSession()
 	if len(args) < 1 {
 		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
 		return
@@ -157,6 +196,7 @@ func getPassword(args []string) {
 
 // 获取密码并直接展示明文
 func getPasswordDirect(args []string) {
+	mustCheckSession()
 	if len(args) < 1 {
 		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
 		return
@@ -172,6 +212,7 @@ func getPasswordDirect(args []string) {
 
 // 设置密码
 func setPassword(args []string) {
+	mustCheckSession()
 	if len(args) < 1 {
 		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
 		return
@@ -180,12 +221,13 @@ func setPassword(args []string) {
 	// 1. 输入密码（required）
 	var password string
 	var description string
-	bio := bufio.NewReader(os.Stdin)
+	// bio := bufio.NewReader(os.Stdin)
 	// use a loop to get a non-empty password
 	for password == "" {
 		fmt.Print("Enter password: ")
-		line, _, _ := bio.ReadLine()
-		password = string(line)
+		// line, _, _ := bio.ReadLine()
+		// password = strings.Trim(string(line),"\r\n ")
+		password = envutil.ReadLine()
 		// fmt.Scanf("%s", &password)
 		if password == "" {
 			fmt.Println("Error: password can not be empty, please enter again!")
@@ -196,8 +238,9 @@ func setPassword(args []string) {
 	// 2. got item description
 	fmt.Print("Enter item description: ")
 	// fmt.Scanln(&description)
-	line, _, _ := bio.ReadLine()
-	description = string(line)
+	// line, _, _ := bio.ReadLine()
+	// description = string(line)
+	description = envutil.ReadLine()
 	// 3. save password
 	passwdItem, err := pwditem.GetByItem(itemKey)
 	if err != nil {
@@ -233,6 +276,7 @@ func setPassword(args []string) {
 
 // 展示所有密码项
 func showItems() {
+	mustCheckSession()
 	items, err := pwditem.GetItems()
 	if err != nil {
 		fmt.Printf("Error while query items : %s \n", err)
@@ -247,11 +291,19 @@ func showItems() {
 
 // 删除密码项
 func deleteItem(args []string) {
+	mustCheckSession()
 	if len(args) < 1 {
 		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
 		return
 	}
 	itemKey := args[0]
+	// confirm user operation
+	fmt.Printf("Do you confirm to remove password for %s? (y/n) : ", itemKey)
+	input := envutil.ReadChar()
+	if strings.ToLower(input) != "y" {
+		fmt.Println("Operation terminated!")
+		return
+	}
 	affectedRows, err := pwditem.DeleteByItem(itemKey)
 	if err != nil {
 		fmt.Printf("Remove password item failed : %s \n", err)
@@ -262,6 +314,18 @@ func deleteItem(args []string) {
 		return
 	}
 	fmt.Printf("Password item [%s] already removed. \n", itemKey)
+}
+
+// 锁定会话（删除会话信息）
+func lock() {
+	if config.Sess != nil {
+		err := config.Sess.Destroy()
+		if err != nil {
+			fmt.Printf("Lock current session failed : %s \n", err)
+			return
+		}
+	}
+	fmt.Println("Session destroyed!")
 }
 
 // 执行测试命令

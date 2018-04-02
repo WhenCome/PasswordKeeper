@@ -64,7 +64,6 @@ func GetContents(filePath string) ([]byte,error) {
 
 // 写入文件
 func WriteFile(filePath, content string) (int, error) {
-	fmt.Printf("File: %s;  Content: %s \n", filePath, content)
 	var f *os.File
 	var err error
 	if !IsFileExists(filePath) {

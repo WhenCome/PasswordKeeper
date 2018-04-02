@@ -15,6 +15,7 @@ var InitFlagFile string			// 初始化标记
 var AppConfigFile string 		// app配置文件
 
 var SessionTokenFile string		// 会话令牌文件
+var Sess *Session = nil
 
 // 配置信息
 var AppConfig *PwdKeeperConfig = nil
@@ -51,4 +52,9 @@ func init() {
 	DbFile = fmt.Sprintf("%s/%s", AppDataDir, DbName)
 	// 会话相关文件
 	SessionTokenFile = fmt.Sprintf("%s/session", AppDataDir)
+	// 加载会话信息
+	Sess = LoadSession()
+	if Sess == nil {
+		Sess = NewSession()
+	}
 }

@@ -45,3 +45,4 @@ func (cfg *PwdKeeperConfig) SetBackupDir(backupDir string) {
 	}
 	cfg.UserCfg.BackupDir = backupDir
 }
+
