@@ -7,6 +7,7 @@ import (
 	"../utils/randutil"
 	"../utils/timeutil"
 	"../utils/envutil"
+	"../utils/fileutil"
 	"../config"
 	"../db/pwditem"
 	"log"
@@ -72,6 +73,16 @@ func initEnv() {
 			pwdCfg = &config.PwdKeeperConfig{}
 		} else {
 			fmt.Printf("Load config failed: %s \n", err)
+			return
+		}
+	}
+
+	// 如果已经初始化过，则需要验证用户权限
+	if fileutil.IsFileExists(config.InitFlagFile) && pwdCfg.UserCfg.SecurityCode != "" {
+		fmt.Print("Please enter security code : ")
+		securityCode := envutil.ReadLine()
+		if !verifySecurityCode(pwdCfg, securityCode) {
+			fmt.Println("Security verify failed!")
 			return
 		}
 	}
