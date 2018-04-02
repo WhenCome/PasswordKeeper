@@ -44,8 +44,5 @@ func ExecCommand(command string, args []string) {
 	// 锁定会话（删除会话信息）
 	case "LOCK":
 		lock()
-	// 测试项目
-	case "TEST":
-		execTest()
 	}
 }

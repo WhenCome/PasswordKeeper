@@ -411,7 +411,3 @@ func changeDescription(args []string) {
 	fmt.Println("Description changed.")
 }
 
-// 执行测试命令
-func execTest() {
-	// encryptutil.GenRsaKey(2048, config.AppDataDir)
-}
