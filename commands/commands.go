@@ -26,10 +26,13 @@ func mustCheckSession() {
 	pwdCfg, err := config.LoadConfig()
 	if err != nil {
 		fmt.Printf("Load config failed: %s . Have you initialized it before?\n", err)
-		return
+		os.Exit(-1)
 	}
-	fmt.Print("Please enter security code : ")
-	securityCode := envutil.ReadLine()
+	securityCode, err := envutil.ReadPassword("Please enter security code : ")
+	if err != nil {
+		fmt.Printf("Read password failed : %s \n", err)
+		os.Exit(-1)
+	}
 	if !verifySecurityCode(pwdCfg, securityCode) {
 		fmt.Println("Security verify failed!")
 		os.Exit(-1)
@@ -54,8 +57,15 @@ func mustVerifySecurity() {
 		fmt.Printf("Load config failed: %s \n. Please try again later.", err)
 		os.Exit(-1)
 	}
-	fmt.Print("Please enter security code : ")
-	securityCode := envutil.ReadLine()
+	verifySecurity(pwdCfg)
+}
+
+func verifySecurity(pwdCfg *config.PwdKeeperConfig) {
+	securityCode, err := envutil.ReadPassword("Please enter security code : ")
+	if err != nil {
+		fmt.Printf("Read security code failed : %s \n", err)
+		os.Exit(-1)
+	}
 	if !verifySecurityCode(pwdCfg, securityCode) {
 		fmt.Println("Security verify failed!")
 		os.Exit(-1)
@@ -100,12 +110,7 @@ func initEnv() {
 
 	// 如果已经初始化过，则需要验证用户权限
 	if fileutil.IsFileExists(config.InitFlagFile) && pwdCfg.UserCfg.SecurityCode != "" {
-		fmt.Print("Please enter security code : ")
-		securityCode := envutil.ReadLine()
-		if !verifySecurityCode(pwdCfg, securityCode) {
-			fmt.Println("Security verify failed!")
-			return
-		}
+		verifySecurity(pwdCfg)
 	}
 
 	// 生成证书信息
@@ -119,8 +124,11 @@ func initEnv() {
 	// 设置安全密码
 	securityPwd := ""
 	for securityPwd == "" {
-		fmt.Print("Enter security code: ")
-		securityPwd := envutil.ReadLine()
+		securityPwd, err := envutil.ReadPassword("Please enter security code : ")
+		if err != nil {
+			fmt.Printf("Read security code failed : %s \n", err)
+			continue
+		}
 		if securityPwd == "" {
 			fmt.Println("Error: security code can not be empty, please enter again!")
 			continue
@@ -238,20 +246,18 @@ func setPassword(args []string) {
 	}
 	itemKey := args[0]
 	// 1. 输入密码（required）
-	var password string
-	var description string
-	for password == "" {
-		fmt.Print("Enter password: ")
-		password = envutil.ReadLine()
-		if password == "" {
-			fmt.Println("Error: password can not be empty, please enter again!")
-			continue
-		}
-		break
+	password, err := envutil.ReadPassword("Enter password : ")
+	if err != nil {
+		fmt.Printf("Read password failed : %s \n", err)
+		return
+	}
+	if password == "" {
+		fmt.Println("Error: password can not be empty, please enter again!")
+		return
 	}
 	// 2. got item description
 	fmt.Print("Enter item description: ")
-	description = envutil.ReadLine()
+	description := envutil.ReadLine()
 	// 3. save password
 	passwdItem, err := pwditem.GetByItem(itemKey)
 	if err != nil {
@@ -340,7 +346,7 @@ func lock() {
 }
 
 // 描述项目
-func descripeItem(args []string) {
+func describeItem(args []string) {
 	mustCheckSession()
 	if len(args) < 1 {
 		fmt.Println("Invalid arguments, use [help] command view commands list and usage.")
@@ -370,10 +376,22 @@ func changePassword(args []string) {
 		fmt.Println("Operation terminated!")
 		return
 	}
-	fmt.Print("Enter your new password : ")
-	pwd1 := envutil.ReadLine()
-	fmt.Print("Confirm your new password : ")
-	pwd2 := envutil.ReadLine()
+	// fmt.Print("Enter your new password : ")
+	// pwd1 := envutil.ReadLine()
+	pwd1, err := envutil.ReadPassword("Enter your new password : ")
+	if err != nil {
+		fmt.Printf("Read password failed : %s \n", err)
+		return
+	}
+
+	// fmt.Print("Confirm your new password : ")
+	// pwd2 := envutil.ReadLine()
+	pwd2, err := envutil.ReadPassword("Confirm your new password : ")
+	if err != nil {
+		fmt.Printf("Read password failed : %s \n", err)
+		return
+	}
+
 	if pwd1 != pwd2 {
 		fmt.Println("ERROR : password not match!")
 		return
@@ -410,4 +428,3 @@ func changeDescription(args []string) {
 	}
 	fmt.Println("Description changed.")
 }
-

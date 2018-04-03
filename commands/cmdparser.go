@@ -31,7 +31,7 @@ func ExecCommand(command string, args []string) {
 		showItems()
 	// 显示项目的描述信息
 	case "DESC":
-		descripeItem(args)
+		describeItem(args)
 	// 修改密码
 	case "CHPWD":
 		changePassword(args)

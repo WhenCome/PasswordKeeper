@@ -9,6 +9,7 @@ import (
 	"errors"
 	"runtime"
 	"bufio"
+	"github.com/bgentry/speakeasy"
 )
 
 // 获取home目录路径，需要区分windows以及linux
@@ -77,4 +78,13 @@ func ReadChar() string {
 	bio := bufio.NewReader(os.Stdin)
 	b,_ := bio.ReadByte()
 	return string(b)
+}
+
+// 读取密码
+func ReadPassword(tip string) (string, error) {
+	password, err := speakeasy.Ask(tip)
+	if err != nil {
+		return "",err
+	}
+	return password, nil
 }
