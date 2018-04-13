@@ -9,19 +9,16 @@ import (
 	"errors"
 )
 
-var AppName string = "PWDKeeper"
-var AppDataDir string			// app数据目录
-var InitFlagFile string			// 初始化标记
-var AppConfigFile string 		// app配置文件
-
-var SessionTokenFile string		// 会话令牌文件
-var Sess *Session = nil
-
-// 配置信息
-var AppConfig *PwdKeeperConfig = nil
-
-// 错误信息
-var ErrConfigNotExists error = errors.New("Config File Not Exists")
+var (
+	AppName = "PasswordKeeper"
+	AppDataDir string			// app数据目录
+	InitFlagFile string			// 初始化标记
+	AppConfigFile string 		// app配置文件
+	SessionTokenFile string		// 会话令牌文件
+	Sess *Session = nil
+	AppConfig *PwdKeeperConfig = nil	// 配置信息
+	ErrConfigNotExists = errors.New("Config File Not Exists")		// 错误信息
+)
 
 func init() {
 	homeDir, err := envutil.GetHomeDir()

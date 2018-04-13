@@ -21,7 +21,7 @@ func mustCheckSession() {
 	if config.Sess.IsValid() {
 		return
 	}
-	fmt.Println("Session invalid! We need confirm your auth again.")
+	fmt.Println("Session invalid! We need confirm your authentication again.")
 	// 加载配置
 	pwdCfg, err := config.LoadConfig()
 	if err != nil {
@@ -218,7 +218,7 @@ func getPassword(args []string) {
 		fmt.Printf("Copy password failed : %s \n", err)
 		return
 	}
-	fmt.Println("Password already copied, you can paste it anywhere you want.")
+	fmt.Println("Password already be copied, you can paste it anywhere you want.")
 }
 
 // 获取密码并直接展示明文
@@ -376,16 +376,13 @@ func changePassword(args []string) {
 		fmt.Println("Operation terminated!")
 		return
 	}
-	// fmt.Print("Enter your new password : ")
-	// pwd1 := envutil.ReadLine()
+
 	pwd1, err := envutil.ReadPassword("Enter your new password : ")
 	if err != nil {
 		fmt.Printf("Read password failed : %s \n", err)
 		return
 	}
 
-	// fmt.Print("Confirm your new password : ")
-	// pwd2 := envutil.ReadLine()
 	pwd2, err := envutil.ReadPassword("Confirm your new password : ")
 	if err != nil {
 		fmt.Printf("Read password failed : %s \n", err)
