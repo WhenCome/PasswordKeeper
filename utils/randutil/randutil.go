@@ -23,7 +23,6 @@ func GetRandDigitString(length int) string {
 
 // 生成给定范围的随机数
 func GenerateRangeRandNumber(min, max int) int {
-	rand.Seed(time.Now().UnixNano())
 	randNum := rand.Intn(max - min) + min
 	return randNum
 }
@@ -34,9 +33,11 @@ func GetRandAlphaDigitString(length int) string {
 	var randChars []string
 	randChars = append(randChars, Alphabets...)
 	randChars = append(randChars, Digits...)
+	rand.Seed(time.Now().UnixNano())
 	var idx int = 0
+	randPos := 0
 	for idx<length {
-		randPos := GenerateRangeRandNumber(0, len(randChars)-1)
+		randPos = GenerateRangeRandNumber(0, len(randChars)-1)
 		buffer.WriteString(randChars[randPos])
 		idx++
 	}

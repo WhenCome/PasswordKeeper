@@ -44,5 +44,8 @@ func ExecCommand(command string, args []string) {
 	// 锁定会话（删除会话信息）
 	case "LOCK":
 		lock()
+	// 命令不支持
+	default:
+		showNotSupportTip(cmd)
 	}
 }

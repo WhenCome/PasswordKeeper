@@ -51,6 +51,10 @@ func syncDir(dir string, targetDir string) {
 		if err != nil {
 			return err
 		}
+		// 不同步目录本身
+		if path == dir {
+			return nil
+		}
 		if info.IsDir() {
 			syncDir(fmt.Sprintf("%s/%s", dir, info.Name()), fmt.Sprintf("%s/%s", targetDir, info.Name()))
 		} else {

@@ -425,3 +425,9 @@ func changeDescription(args []string) {
 	}
 	fmt.Println("Description changed.")
 }
+
+// 展示命令不支持提示
+func showNotSupportTip(cmd string) {
+	fmt.Printf("Command [%s] not supported, please check your spell or use help to see supported commands.\n", cmd)
+	os.Exit(1)
+}
