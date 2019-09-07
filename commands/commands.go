@@ -109,9 +109,36 @@ func initEnv() {
 		}
 	}
 
+	// 保存原有的密码信息(用于重置密码信息)
+	var oldPwdItems []*pwditem.PwdItem
+
 	// 如果已经初始化过，则需要验证用户权限
 	if fileutil.IsFileExists(config.InitFlagFile) && pwdCfg.UserCfg.SecurityCode != "" {
 		verifySecurity(pwdCfg)
+		// 提示重新初始化会导致之前的秘钥全部失效
+		fmt.Print("You have initialize your environment, reinit it may cause the exists password invalid. Do you confirm it? (y/n): ")
+		inputChar := strings.ToUpper(envutil.ReadChar())
+		if inputChar != "Y" {
+			fmt.Println("Not confirmed!")
+			return
+		}
+		// 获取原有的密码项
+		oldPwdItems, err = pwditem.GetAllItemPasswords()
+		if err != nil {
+			fmt.Println("Read old passwords failed, exit")
+			return
+		}
+		// 将所有的密码项解析成明文
+		if len(oldPwdItems) > 0 {
+			for _, pi := range oldPwdItems {
+				decData, err := encryptutil.DecryptData(pi.Password)
+				if err != nil {
+					// 出错的直接忽略
+					continue
+				}
+				pi.Password = decData
+			}
+		}
 	}
 
 	// 生成证书信息
@@ -154,6 +181,20 @@ func initEnv() {
 	}
 	// 创建初始化标志文件
 	config.CreateInitFlag()
+
+	// 重新保存密码信息
+	if len(oldPwdItems) > 0 {
+		for _, pi := range oldPwdItems {
+			encPwd, err := encryptutil.EncryptData(pi.Password)
+			if err != nil {
+				// 加密失败则忽略
+				continue
+			}
+			pi.Password = encPwd
+			// 更新数据（忽略更新结果）
+			pi.UpdateToDb()
+		}
+	}
 }
 
 // 同步配置

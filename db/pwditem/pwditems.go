@@ -145,3 +145,32 @@ func DeleteByItem(item string) (int64, error) {
 	}
 	return affectedRows, nil
 }
+
+// 获取全部项
+func GetAllItemPasswords() ([]*PwdItem, error) {
+	querySql := "select _id,item,password,update_time from pwd_items"
+	stmt, err := db.Db.Connection.Prepare(querySql)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	// 开始查询
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+	items := make([]*PwdItem, 0)
+	for rows.Next() {
+		pItem := NewPwdItem()
+		err = rows.Scan(
+			&pItem.Id,
+			&pItem.Item,
+			&pItem.Password,
+			&pItem.UpdateTime)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, pItem)
+	}
+	return items, nil
+}
