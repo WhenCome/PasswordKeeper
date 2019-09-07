@@ -1,11 +1,11 @@
 package randutil
 
 import (
-	"time"
-	"fmt"
-	"strings"
-	"math/rand"
 	"bytes"
+	"fmt"
+	"math/rand"
+	"strings"
+	"time"
 )
 
 var Alphabets []string = []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
@@ -18,12 +18,13 @@ func GetRandDigitString(length int) string {
 	if len(s) >= length {
 		return s[len(s)-length:]
 	}
-	return strings.Repeat("0", length - len(s)) + s
+	return strings.Repeat("0", length-len(s)) + s
 }
 
 // 生成给定范围的随机数
 func GenerateRangeRandNumber(min, max int) int {
-	randNum := rand.Intn(max - min) + min
+	rand.Seed(time.Now().UnixNano())
+	randNum := rand.Intn(max-min) + min
 	return randNum
 }
 
@@ -36,11 +37,10 @@ func GetRandAlphaDigitString(length int) string {
 	rand.Seed(time.Now().UnixNano())
 	var idx int = 0
 	randPos := 0
-	for idx<length {
+	for idx < length {
 		randPos = GenerateRangeRandNumber(0, len(randChars)-1)
 		buffer.WriteString(randChars[randPos])
 		idx++
 	}
 	return buffer.String()
 }
-

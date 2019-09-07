@@ -1,11 +1,12 @@
 package backuputil
 
 import (
-	"../../config"
-	"../../utils/fileutil"
-	"path/filepath"
-	"os"
 	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/whencome/PasswordKeeper/config"
+	"github.com/whencome/PasswordKeeper/utils/fileutil"
 )
 
 // 同步备份配置
@@ -31,7 +32,7 @@ func Sync() error {
 }
 
 // 同步文件
-func syncFile(srcFile, targetFile string){
+func syncFile(srcFile, targetFile string) {
 	fileutil.CopyFile(targetFile, srcFile)
 }
 

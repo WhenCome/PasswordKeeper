@@ -1,23 +1,24 @@
 package config
 
 import (
-	"../utils/envutil"
-	"../utils/errcode"
-	"../utils/fileutil"
+	"errors"
 	"fmt"
 	"os"
-	"errors"
+
+	"github.com/whencome/PasswordKeeper/utils/envutil"
+	"github.com/whencome/PasswordKeeper/utils/errcode"
+	"github.com/whencome/PasswordKeeper/utils/fileutil"
 )
 
 var (
-	AppName = "PasswordKeeper"
-	AppDataDir string			// app数据目录
-	InitFlagFile string			// 初始化标记
-	AppConfigFile string 		// app配置文件
-	SessionTokenFile string		// 会话令牌文件
-	Sess *Session = nil
-	AppConfig *PwdKeeperConfig = nil	// 配置信息
-	ErrConfigNotExists = errors.New("Config File Not Exists")		// 错误信息
+	AppName            = "PasswordKeeper"
+	AppDataDir         string           // app数据目录
+	InitFlagFile       string           // 初始化标记
+	AppConfigFile      string           // app配置文件
+	SessionTokenFile   string           // 会话令牌文件
+	Sess               *Session         = nil
+	AppConfig          *PwdKeeperConfig = nil                                  // 配置信息
+	ErrConfigNotExists                  = errors.New("Config File Not Exists") // 错误信息
 )
 
 func init() {

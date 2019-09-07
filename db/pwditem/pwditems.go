@@ -2,17 +2,18 @@ package pwditem
 
 import (
 	"database/sql"
-	"../../db"
+
+	"github.com/whencome/PasswordKeeper/db"
 )
 
 // 定义密码项信息
 type PwdItem struct {
-	Id              int64
-	Item            string
-	Password        string
-	Description     string
-	CreateTime      string
-	UpdateTime      string
+	Id          int64
+	Item        string
+	Password    string
+	Description string
+	CreateTime  string
+	UpdateTime  string
 }
 
 // 创建一个空的Trade struct
@@ -48,7 +49,7 @@ func GetByItem(item string) (*PwdItem, error) {
 }
 
 // 将交易信息插入数据库
-func (pwdItem *PwdItem) InsertToDb()  (int64, error) {
+func (pwdItem *PwdItem) InsertToDb() (int64, error) {
 	insertSql := "insert into pwd_items(item,password,description,create_time,update_time) values(?,?,?,?,?)"
 	stmt, err := db.Db.Connection.Prepare(insertSql)
 	if err != nil {
@@ -74,7 +75,7 @@ func (pwdItem *PwdItem) InsertToDb()  (int64, error) {
 }
 
 // 将交易信息更新到数据库中
-func (pwdItem *PwdItem) UpdateToDb()  (int64, error) {
+func (pwdItem *PwdItem) UpdateToDb() (int64, error) {
 	insertSql := "update pwd_items set password = ?, description = ?, create_time = ?, update_time = ? where _id = ?"
 	stmt, err := db.Db.Connection.Prepare(insertSql)
 	if err != nil {

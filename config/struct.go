@@ -3,30 +3,30 @@ package config
 import (
 	"encoding/xml"
 	"fmt"
-	"../utils/fileutil"
+
+	"github.com/whencome/PasswordKeeper/utils/fileutil"
 )
 
 // 配置数据结构
 type PwdKeeperConfig struct {
-	XMLName         xml.Name `xml:"PasswordKeeper"`
-	CertCfg			CertConfig	`xml:"CertCfg"`	// 证书配置
-	UserCfg			UserConfig	`xml:"UserCfg"`	// 用户配置
+	XMLName xml.Name   `xml:"PasswordKeeper"`
+	CertCfg CertConfig `xml:"CertCfg"` // 证书配置
+	UserCfg UserConfig `xml:"UserCfg"` // 用户配置
 }
 
 // 证书相关配置
-type CertConfig struct{
-	PrivateKeyFile  string
-	PublicKeyFile	string
+type CertConfig struct {
+	PrivateKeyFile string
+	PublicKeyFile  string
 }
 
 // 用户配置
 type UserConfig struct {
-	AppDataDir		string      // 数据存储目录
-	BackupDir		string		// 备份目录
-	SecurityCode	string		// app security password
-	Salt			string      // rand string
+	AppDataDir   string // 数据存储目录
+	BackupDir    string // 备份目录
+	SecurityCode string // app security password
+	Salt         string // rand string
 }
-
 
 // 设置备份目录
 func (cfg *PwdKeeperConfig) SetBackupDir(backupDir string) {
@@ -45,4 +45,3 @@ func (cfg *PwdKeeperConfig) SetBackupDir(backupDir string) {
 	}
 	cfg.UserCfg.BackupDir = backupDir
 }
-

@@ -3,10 +3,11 @@ package encryptutil
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"encoding/pem"
 	"crypto/x509"
+	"encoding/pem"
 	"errors"
-	"../../config"
+
+	"github.com/whencome/PasswordKeeper/config"
 )
 
 // 加密

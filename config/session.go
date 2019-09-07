@@ -1,31 +1,32 @@
 package config
 
 import (
-	"../utils/randutil"
-	"../utils/fileutil"
-	"time"
 	"encoding/xml"
 	"fmt"
+	"time"
+
+	"github.com/whencome/PasswordKeeper/utils/fileutil"
+	"github.com/whencome/PasswordKeeper/utils/randutil"
 )
 
 // 会话
 type Session struct {
-	Token 		string
-	CreateTime	int64
-	UpdateTime	int64
-	ExpireTime	int64
+	Token      string
+	CreateTime int64
+	UpdateTime int64
+	ExpireTime int64
 }
 
 // 创建新会话
 func NewSession() *Session {
 	token := randutil.GetRandAlphaDigitString(64)
 	createTime := time.Now().Unix()
-	expireTime := getSessionExpireTime(createTime)  // 暂时默认会话有效期为12个小时
+	expireTime := getSessionExpireTime(createTime) // 暂时默认会话有效期为12个小时
 	sess := &Session{
-		Token:token,
-		CreateTime:createTime,
-		UpdateTime:createTime,
-		ExpireTime:expireTime,
+		Token:      token,
+		CreateTime: createTime,
+		UpdateTime: createTime,
+		ExpireTime: expireTime,
 	}
 	// ignore the error of save session info
 	sess.save()
@@ -37,7 +38,7 @@ func LoadSession() *Session {
 	if !fileutil.IsFileExists(SessionTokenFile) {
 		return nil
 	}
-	xmlBytes,err := fileutil.GetContents(SessionTokenFile)
+	xmlBytes, err := fileutil.GetContents(SessionTokenFile)
 	if err != nil {
 		fmt.Printf("Load session failed : %s \n", err)
 		return nil
@@ -53,7 +54,7 @@ func LoadSession() *Session {
 
 // 获取过期时间
 func getSessionExpireTime(t int64) int64 {
-	return t + 12 * 3600
+	return t + 12*3600
 }
 
 // 检查会话是否有效
@@ -86,7 +87,7 @@ func (sess *Session) save() error {
 		return err
 	}
 	strXml := string(byteXml)
-	_,err = fileutil.WriteFile(SessionTokenFile, strXml)
+	_, err = fileutil.WriteFile(SessionTokenFile, strXml)
 	return err
 }
 

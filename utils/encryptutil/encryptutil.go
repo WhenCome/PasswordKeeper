@@ -1,14 +1,15 @@
 package encryptutil
 
 import (
+	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
-	"crypto/rand"
+	"encoding/base64"
 	"encoding/pem"
 	"os"
-	"encoding/base64"
-	"../fileutil"
-	"../../config"
+
+	"github.com/whencome/PasswordKeeper/config"
+	"github.com/whencome/PasswordKeeper/utils/fileutil"
 )
 
 // 生成RSA证书信息，并返回证书配置内容
@@ -28,17 +29,17 @@ func GenRsaKey(bits int, storePath string) (*config.CertConfig, error) {
 	}
 	file, err := os.Create(cfg.PrivateKeyFile)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	err = pem.Encode(file, block)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	// 生成公钥文件
 	publicKey := &privateKey.PublicKey
 	derPkix, err := x509.MarshalPKIXPublicKey(publicKey)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	block = &pem.Block{
 		Type:  "PUBLIC KEY",
@@ -46,13 +47,13 @@ func GenRsaKey(bits int, storePath string) (*config.CertConfig, error) {
 	}
 	file, err = os.Create(cfg.PublicKeyFile)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	err = pem.Encode(file, block)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return cfg,nil
+	return cfg, nil
 }
 
 // 加密数据

@@ -2,18 +2,19 @@ package commands
 
 import (
 	"fmt"
-	"../utils/encryptutil"
-	"../utils/backuputil"
-	"../utils/randutil"
-	"../utils/timeutil"
-	"../utils/envutil"
-	"../utils/fileutil"
-	"../config"
-	"../db/pwditem"
 	"log"
 	"os"
-	"github.com/atotto/clipboard"
 	"strings"
+
+	"github.com/atotto/clipboard"
+	"github.com/whencome/PasswordKeeper/config"
+	"github.com/whencome/PasswordKeeper/db/pwditem"
+	"github.com/whencome/PasswordKeeper/utils/backuputil"
+	"github.com/whencome/PasswordKeeper/utils/encryptutil"
+	"github.com/whencome/PasswordKeeper/utils/envutil"
+	"github.com/whencome/PasswordKeeper/utils/fileutil"
+	"github.com/whencome/PasswordKeeper/utils/randutil"
+	"github.com/whencome/PasswordKeeper/utils/timeutil"
 )
 
 // 检查会话，用于确保安全操作
@@ -90,8 +91,8 @@ func showHelp() {
 		"\tdel [item_key]\n\t\tdelete given password item from database, if you synchronized all the app data, then the delete operation can not be recoveried",
 		"\tlock\n\t\tlock the current session(current session will be destroyed), this will make you enter your security code, this will be useful when other people can access your computer",
 	}
-	for _,output := range outputs {
-		fmt.Println(output+"\n")
+	for _, output := range outputs {
+		fmt.Println(output + "\n")
 	}
 }
 
@@ -179,7 +180,7 @@ func queryPassword(itemKey string) (string, error) {
 		return "", err
 	}
 	if passwdItem == nil {
-		return "",fmt.Errorf("password item [%s] not exists", itemKey)
+		return "", fmt.Errorf("password item [%s] not exists", itemKey)
 	}
 	decData, err := encryptutil.DecryptData(passwdItem.Password)
 	if err != nil {
@@ -299,10 +300,10 @@ func showItems() {
 		fmt.Printf("Error while query items : %s \n", err)
 		return
 	}
-	fmt.Println(wrapString("Item", 24),"\t",wrapString("Update Time", 24))
-	fmt.Println(wrapString("-------------", 24),"\t",wrapString("----------------", 24))
+	fmt.Println(wrapString("Item", 24), "\t", wrapString("Update Time", 24))
+	fmt.Println(wrapString("-------------", 24), "\t", wrapString("----------------", 24))
 	for _, item := range items {
-		fmt.Println(wrapString(item.Item, 24),"\t",wrapString(item.UpdateTime, 24))
+		fmt.Println(wrapString(item.Item, 24), "\t", wrapString(item.UpdateTime, 24))
 	}
 }
 

@@ -1,10 +1,11 @@
 package config
 
 import (
-	"../utils/fileutil"
-	"../utils/timeutil"
 	"encoding/xml"
 	"log"
+
+	"github.com/whencome/PasswordKeeper/utils/fileutil"
+	"github.com/whencome/PasswordKeeper/utils/timeutil"
 )
 
 // 保存配置信息
@@ -79,4 +80,3 @@ func GetPublicKey() []byte {
 	}
 	return publicKey
 }
-
